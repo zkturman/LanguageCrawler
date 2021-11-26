@@ -25,13 +25,15 @@ namespace LanguageCrawler
 
         public async Task GenerateContent()
         {
-            HttpClient httpClient = new HttpClient();
-            HttpResponseMessage response = await httpClient.GetAsync(url);
-            siteBody = await response.Content.ReadAsStringAsync();
-
-            HtmlDocument htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(siteBody);
-            innerText = htmlDocument.DocumentNode.InnerText;
+            using (HttpClient httpClient = new HttpClient())
+            {
+                httpClient.BaseAddress = new Uri("url");
+                HttpResponseMessage response = await httpClient.GetAsync(url);
+                siteBody = await response.Content.ReadAsStringAsync();
+                HtmlDocument htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(siteBody);
+                innerText = htmlDocument.DocumentNode.InnerText;
+            }
         }
     }
 }

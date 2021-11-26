@@ -28,8 +28,20 @@ namespace LanguageCrawler
 
         public void GetWordCount()
         {
-            wordCount = allWords.GroupBy(x => x.ToLower()).ToDictionary(g => g.Key, g => g.Count()).Where(x => (x.Value > 5) && (x.Key.All(char.IsLetter))).ToDictionary(x => x.Key, x => x.Value);
+            //convert all words to lowercase, get a count of each distinct word, remove words with non-letters 
+            wordCount = allWords.GroupBy(x => x.ToLower()).ToDictionary(g => g.Key, g => g.Count());
+            filterWords();
             selectionSort();
+        }
+
+        private void filterWords()
+        {
+            wordCount = wordCount.Where(x => (x.Value > 5) && isValidWord(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        private bool isValidWord(string word)
+        {
+            return word.All(char.IsLetter);
         }
 
         private void sortWordsByPopulariity()

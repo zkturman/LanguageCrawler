@@ -11,7 +11,7 @@ namespace LanguageCrawler
         private AppLanguage language;
         public TextParser(string text)
         {
-            text = Regex.Replace(text, "\\s+", " ");
+            this.text = Regex.Replace(text, "\\s+", " ");
             language = AppLanguage.English;
         }
 

@@ -22,6 +22,8 @@ namespace LanguageCrawler
         HttpClient baseClient;
         private UrlPackage package;
 
+        public Dictionary<string, int> errorCount = new Dictionary<string, int>();
+
         public UrlCrawler(string url)
         {
             baseUrl = url;
@@ -58,28 +60,48 @@ namespace LanguageCrawler
                 Console.WriteLine("\nCurrent Generation: {0}, Urls to process: {1}", currentGeneration, max);
                 var generationUrls = urlsToProcess.ToArray();
                 urlsToProcess.Clear();
-                await Task.WhenAll(generationUrls.Select(async i => await findAllPageLinks(i)));
+                await Task.WhenAll(generationUrls.Select(async i =>
+                {
+                    if (!isMaxAttempts())
+                    {
+                        await findAllPageLinks(i);
+                    }
+                }));
             }
         }
 
         private async Task findAllPageLinks(string url)
         {
-            HttpResponseMessage response = await baseClient.GetAsync(url);
-            string siteBody = await response.Content.ReadAsStringAsync();
-            HtmlDocument htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(siteBody);
-
-            var links = htmlDocument.DocumentNode.Descendants("a");
-            int i = 0;
-            await Task.WhenAll(links.ToArray().Select(async i =>
+            if (!isMaxAttempts())
             {
-                if (!isMaxAttempts())
+                HttpResponseMessage response = await tryGetResponse(url);
+                if (response != null)
                 {
-                    await tryAddUrl(i.GetAttributeValue("href", "broken link"));
-                }
-            }));
+                    string siteBody = await response.Content.ReadAsStringAsync();
+                    HtmlDocument htmlDocument = new HtmlDocument();
+                    htmlDocument.LoadHtml(siteBody);
 
-            Console.WriteLine("\n***{0} --> {1}",url, urlSet.Count);
+                    var links = htmlDocument.DocumentNode.Descendants("a").ToArray();
+
+                    int i = 0;
+                    while (i < links.Count() && !isMaxAttempts())
+                    {
+                        await tryAddUrl(links[i].GetAttributeValue("href", "broken link"));
+                        i++;
+                    }
+                    Console.WriteLine("\n***{0} --> {1}", url, urlSet.Count);
+                }
+            }
+
+
+            //await Task.WhenAll(links.ToArray().Select(async i =>
+            //{
+            //    if (!isMaxAttempts())
+            //    {
+            //        await tryAddUrl(i.GetAttributeValue("href", "broken link"));
+            //    }
+            //}));
+
         }
 
         private async Task tryAddUrl(string urlToTry)
@@ -87,26 +109,36 @@ namespace LanguageCrawler
             urlToTry = removePrefixedSlash(urlToTry);
             if (canTryAddress(urlToTry))
             {
-                try
+                HttpResponseMessage response = await tryGetResponse(urlToTry);
+                if (response != null && response.IsSuccessStatusCode)
                 {
-                    HttpResponseMessage response = await baseClient.GetAsync(urlToTry);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        urlsToProcess.Add(urlToTry);
-                        urlSet.Add(urlToTry);
-                        Console.Write(".");
-                    }
-                }
-                catch (HttpRequestException hre)
-                {
-                    Console.WriteLine("\n{0} threw an error: {1}.", urlToTry, hre.Message);
-                    Console.WriteLine("\n{0}.", hre.InnerException.Message);
-                }
-                catch (OperationCanceledException oce)
-                {
-                    Console.WriteLine("\n{0} threw an error: {1}.", urlToTry, oce.Message);
+                    urlsToProcess.Add(urlToTry);
+                    urlSet.Add(urlToTry);
+                    Console.Write(".");
                 }
             }
+        }
+
+        private async Task<HttpResponseMessage> tryGetResponse(string url)
+        {
+            try
+            {
+                HttpResponseMessage response = await baseClient.GetAsync(url);
+                return response;
+            }
+            catch (HttpRequestException hre)
+            {
+                addError(hre);
+            }
+            catch (OperationCanceledException oce)
+            {
+                addError(oce);
+            }
+            catch (SystemException except)
+            {
+                addError(except);
+            }
+            return null;
         }
 
         private bool isMaxAttempts()
@@ -129,6 +161,33 @@ namespace LanguageCrawler
                 url = stringBuilder.ToString();
             }
             return url;
+        }
+
+        private void addError(Exception except)
+        {
+            string message = "";
+            if (except.InnerException != null)
+            {
+                message = except.InnerException.Message;
+            }
+            else
+            {
+                message = except.Message;
+            }
+
+            if (errorCount.ContainsKey(message))
+            {
+                errorCount[message]++;
+            }
+            else
+            {
+                errorCount.Add(message, 1);
+            }
+        }
+
+        public void PrintHttpErrors()
+        {
+            errorCount.Select(kvp => kvp.Key + ": " + kvp.Value.ToString()).ToList().ForEach(Console.WriteLine);
         }
 
         public UrlPackage GetPackage()

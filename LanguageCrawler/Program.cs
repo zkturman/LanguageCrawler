@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace LanguageCrawler
 {
@@ -15,7 +16,21 @@ namespace LanguageCrawler
             //wordCount.GetWordCount();
             //wordCount.PrintWords();
             UrlCrawler google = new UrlCrawler("https://en.wikipedia.org");
-            await google.CrawlThroughUrls();
+            try
+            {
+                await google.CrawlThroughUrls();
+                google.PrintHttpErrors();
+            }
+            catch(HttpRequestException except)
+            {
+                Console.WriteLine(except.Message);
+                Console.WriteLine(except.StackTrace);
+            }
+            catch (SystemException except)
+            {
+                Console.WriteLine(except.Message);
+                Console.WriteLine(except.StackTrace);
+            }
         }
     }
 }

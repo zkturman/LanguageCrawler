@@ -18,6 +18,8 @@ On this screen, users have started a round of vocabulary generation. This screen
   - URLs will be tracked to avoid duplicates appearing in the database. These URLs will be skipped.
   - The database word counts will, initially be wiped back to 0 and the count will be readjusted
 
+![Image](GenerateScreenFlow.png)
+
 ## Print Screen ##
 Here users print their target vocabular to file. This file can be used for different flashcard applications, like Anki.
     - User specifies how many words to print (out of a total count)

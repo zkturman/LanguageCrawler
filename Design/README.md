@@ -9,6 +9,8 @@ In this stage, users will need to configure the types of URLs that will be used 
   - Print existing database to certain file format (.csv) goes to Print Screen
   - Modify settings and go to the Settings Screen
 
+![Image](/StartScreenFlow.drawio.png)
+
 ## Generation Screen ##
 On this screen, users have started a round of vocabulary generation. This screen does the following
   - Shows the current progress of the generation

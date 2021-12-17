@@ -22,11 +22,11 @@ On this screen, users have started a round of vocabulary generation. This screen
 
 ## Print Screen ##
 Here users print their target vocabular to file. This file can be used for different flashcard applications, like Anki.
-    - User specifies how many words to print (out of a total count)
-      - User specifies saving directory and file name (opens prompt if *)
-        - User confirms to save a generically named file to the current directory
-        - Users denies and reverts to directory naming
-      - Users exits if no command entered
+  - User specifies how many words to print (out of a total count)
+    - User specifies saving directory and file name (opens prompt if *)
+      - User confirms to save a generically named file to the current directory
+      - Users denies and reverts to directory naming
+    - Users exits if no command entered
 
 ## Settings Screen ##
 In this area, users can modify the URLs that will be used to generate vocabulary. Here they can do the following

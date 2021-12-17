@@ -28,6 +28,8 @@ Here users print their target vocabular to file. This file can be used for diffe
       - Users denies and reverts to directory naming
     - Users exits if no command entered
 
+![Image](PrintScreenFlow.png)
+
 ## Settings Screen ##
 In this area, users can modify the URLs that will be used to generate vocabulary. Here they can do the following
   - Users can erase all existing URLs
